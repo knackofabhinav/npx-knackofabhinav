@@ -12,6 +12,7 @@ const request = require('request');
 const path = require('path');
 const ora = require('ora');
 const cliSpinners = require('cli-spinners');
+const qrcode = require('qrcode-terminal');
 clear();
 
 const prompt = inquirer.createPromptModule();
@@ -20,27 +21,42 @@ const questions = [
     {
         type: "list",
         name: "action",
-        message: "What you want to do?",
+        message: "What would you like to do?",
         choices: [
             {
-                name: `Send me an ${chalk.green.bold("email")}?`,
+                name: `📧 Send me an ${chalk.green.bold("email")}`,
                 value: () => {
-                    open("mailto:knackofabhinav@gmail.com");
-                    console.log("\nDone, see you soon at inbox.\n");
+                    const subject = "Reaching out from your CLI Business Card - [Your Name]";
+                    const body = `Hi Abhinav,
+
+I found your CLI business card interesting and wanted to reach out.
+
+[Your message here]
+
+Best regards,
+[Your Name]`;
+
+                    const gmailUrl = createGmailComposeUrl(
+                        'knackofabhinav@gmail.com',
+                        subject,
+                        body
+                    );
+                    open(gmailUrl);
+                    console.log("\nGreat! I look forward to reading your message. Don't forget to replace the placeholders in the email template.\n");
                 }
             },
            
             {
-                name: `Schedule a ${chalk.redBright.bold("Meeting")}?`,
+                name: `🗓 Schedule a ${chalk.redBright.bold("meeting")}`,
                 value: () => {
                     open('https://calendly.com/knackofabhinav/30min');
-                    console.log("\n See you at the meeting \n");
+                    console.log("\nExcellent! I'm excited to meet with you.\n");
                 }
             },
             {
-                name: "Just quit.",
+                name: "👋 Exit",
                 value: () => {
-                    console.log(chalk.green.bold("Have a great day! :)\n"));
+                    console.log(chalk.green.bold("Thanks for stopping by! Have a fantastic day! 😊\n"));
                 }
             }
         ]
@@ -48,65 +64,92 @@ const questions = [
 ];
 
 const data = {
-    name: chalk.bold.green("             Abhinav Patel"),
-    handle: chalk.white("@knackofabhinav"),
-    work: `${chalk.white("Software Engineer at")} ${chalk
-        .hex("#2b82b2")
-        .bold("GeekyAnts")}`,
+    name: chalk.bold.green("Abhinav Patel"),
+    work: `${chalk.white("Full Stack Engineer at")} ${chalk.hex("#2b82b2").bold("GeekyAnts")}`,
     twitter: chalk.gray("https://twitter.com/") + chalk.cyan("knackofabhinav"),
     github: chalk.gray("https://github.com/") + chalk.green("knackofabhinav"),
     linkedin: chalk.gray("https://linkedin.com/in/") + chalk.blue("knackofabhinav"),
-    web: chalk.cyan("https://knackofabhinav.tech"),
+    web: chalk.cyan("https://knackofabhinav.com"),
     npx: chalk.red("npx") + " " + chalk.white("knackofabhinav"),
-
-    labelWork: chalk.white.bold("       Work:"),
-    labelTwitter: chalk.white.bold("    Twitter:"),
-    labelGitHub: chalk.white.bold("     GitHub:"),
-    labelLinkedIn: chalk.white.bold("   LinkedIn:"),
-    labelWeb: chalk.white.bold("        Web:"),
-    labelCard: chalk.white.bold("       Card:")
+    labelTwitter: chalk.yellow.bold("Twitter:"),
+    labelGitHub: chalk.yellow.bold("GitHub:"),
+    labelLinkedIn: chalk.yellow.bold("LinkedIn:"),
+    labelWeb: chalk.yellow.bold("Web:"),
+    labelCard: chalk.yellow.bold("Card:"),
+    labelBio: chalk.magenta.bold("Bio:"),
+    bio: [
+        chalk.italic("🚀 Building the products that make a difference."),
+        chalk.italic("💡 Let's connect and build something amazing together!")
+    ].join('\n')
 };
+
+// Generate QR code as an array of centered strings
+let qrCodeLines = [];
+qrcode.generate(data.web, { small: true }, (qr) => {
+  qrCodeLines = qr.split('\n').map(line => line.trimEnd());
+  const maxLength = Math.max(...qrCodeLines.map(line => line.length));
+  qrCodeLines = qrCodeLines.map(line => line.padStart((maxLength + line.length) / 2).padEnd(maxLength));
+});
 
 const me = boxen(
     [
+        `${qrCodeLines.join('\n')}`,
+        ``,
         `${data.name}`,
+        `${data.work}`,
         ``,
-        `${data.labelWork}  ${data.work}`,
+        `${data.bio}`,
         ``,
-        `${data.labelTwitter}  ${data.twitter}`,
-        `${data.labelGitHub}  ${data.github}`,
-        `${data.labelLinkedIn}  ${data.linkedin}`,
-        `${data.labelWeb}  ${data.web}`,
+        `${data.labelTwitter}  ${chalk.gray("𝕏")} ${data.twitter}`,
+        `${data.labelGitHub}  ${chalk.gray("")} ${data.github}`,
+        `${data.labelLinkedIn}  ${chalk.gray("")} ${data.linkedin}`,
+        `${data.labelWeb}  ${chalk.gray("🌐")} ${data.web}`,
         ``,
         `${data.labelCard}  ${data.npx}`,
-        ``,
-        `${chalk.italic(
-            "I am currently looking for new opportunities,"
-        )}`,
-        `${chalk.italic("my inbox is always open. Whether you have a")}`,
-        `${chalk.italic(
-            "question or just want to say hi, I will try "
-        )}`,
-        `${chalk.italic(
-            "my best to get back to you!"
-        )}`
     ].join("\n"),
     {
         margin: 1,
         float: 'center',
         padding: 1,
-        borderStyle: "single",
-        borderColor: "green"
+        borderStyle: "round",
+        borderColor: "cyan",
+        borderWidth: 2,
+        textAlignment: 'center'
     }
 );
 
 console.log(me);
-const tip = [
-    `Tip: Try ${chalk.cyanBright.bold(
-        "cmd/ctrl + click"
-    )} on the links above`,
-    '',
-].join("\n");
-console.log(tip);
 
-prompt(questions).then(answer => answer.action());
+const tip = [
+    `Tip: Copy and paste the URLs into your browser to visit the links`,
+    '',
+    `Or run ${chalk.cyanBright.bold("npx knackofabhinav")} again to select an action.`,
+    ''
+].join("\n");
+
+const spinner = ora({
+  text: 'Loading options...',
+  spinner: 'dots'
+}).start();
+
+try {
+  setTimeout(() => {
+    spinner.stop();
+    console.log(tip);
+    prompt(questions)
+      .then(answer => answer.action())
+      .catch(error => {
+        console.error('An error occurred:', error);
+      });
+  }, 1500);
+} catch (error) {
+  console.error('An unexpected error occurred:', error);
+}
+
+function createGmailComposeUrl(to, subject = '', body = '') {
+  const params = new URLSearchParams();
+  params.append('to', to);
+  if (subject) params.append('su', subject);
+  if (body) params.append('body', body);
+  return `https://mail.google.com/mail/?view=cm&fs=1&tf=1&${params.toString()}`;
+}

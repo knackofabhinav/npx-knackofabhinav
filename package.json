@@ -1,31 +1,24 @@
 {
   "name": "knackofabhinav",
-  "version": "4.0.0",
-  "description": "A personal card for Abhinav Patel (@knackofabhinav)",
+  "version": "1.0.0",
+  "description": "A personal card for Abhinav Patel",
   "main": "card.js",
   "bin": "./card.js",
   "scripts": {
-    "test": "node card.js",
-    "pub": "npm version major & npm publish"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "card",
-    "npm",
-    "npm card",
-    "npx",
-    "npx card",
-    "business card"
-  ],
-  "author": "Abhinav Patel <knackofabhinav@gmail.com> (https://knackofabhinav.tech/)",
+  "keywords": ["card", "npm", "npx", "business card", "profile"],
+  "author": "Abhinav Patel",
   "license": "ISC",
   "dependencies": {
-    "boxen": "^4.2.0",
-    "chalk": "^4.1.0",
+    "boxen": "^5.0.1",
+    "chalk": "^4.1.2",
     "clear": "^0.1.0",
-    "cli-spinners": "^2.5.0",
-    "inquirer": "^7.3.2",
-    "open": "^7.0.4",
-    "ora": "^5.1.0",
-    "request": "^2.88.2"
+    "cli-spinners": "^2.6.1",
+    "inquirer": "^8.2.0",
+    "open": "^8.4.0",
+    "ora": "^5.4.1",
+    "request": "^2.88.2",
+    "qrcode-terminal": "^0.12.0"
   }
 }
